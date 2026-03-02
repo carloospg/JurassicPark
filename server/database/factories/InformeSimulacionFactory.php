@@ -17,7 +17,8 @@ class InformeSimulacionFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tipo' => fake()->randomElement(['Normal', 'Brecha']),
+            'detalles' => json_encode(['resultado' => 'Simulación de prueba', 'bajas' => fake()->numberBetween(0, 5)]),
         ];
     }
 }

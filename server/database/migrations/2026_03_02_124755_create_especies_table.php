@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('especies', function (Blueprint $table) {
             $table->id();
-            $table->string('nombe');
+            $table->string('nombre');
             $table->enum('dieta', ['Herbivoros', 'Omnivoros', 'Carnivoros']);
-            $table->enum('peligorsidad', ['Bajo', 'Medio', 'Alto', 'Muy Alto', 'Extremo', 'Critico']);
+            $table->enum('peligrosidad', ['Bajo', 'Medio', 'Alto', 'Muy Alto', 'Extremo', 'Critico']);
             $table->timestamps();
         });
     }

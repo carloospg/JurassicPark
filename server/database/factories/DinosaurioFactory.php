@@ -17,7 +17,10 @@ class DinosaurioFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'nick' => fake()->firstName() . 'saurus',
+            'edad' => fake()->numberBetween(1, 30),
+            'especie_id' => \App\Models\Especie::inRandomOrder()->first()->id ?? 1,
+            'celda_id' => \App\Models\Celda::inRandomOrder()->first()->id ?? 1,
         ];
     }
 }

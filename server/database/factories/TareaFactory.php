@@ -17,7 +17,9 @@ class TareaFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'tipo' => fake()->randomElement(['Alimentar', 'Reparar valla', 'Curar dinosaurio', 'Limpieza']),
+            'estado' => fake()->randomElement(['Pendiente', 'En progreso', 'Finalizada']),
+            'celda_id' => \App\Models\Celda::inRandomOrder()->first()->id ?? 1,
         ];
     }
 }
