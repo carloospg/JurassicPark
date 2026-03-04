@@ -17,9 +17,14 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+        $this->call([
+            UserSeeder::class,
+            EspecieSeeder::class,
         ]);
+
+        \App\Models\User::factory(10)->create();
+        \App\Models\Celda::factory(20)->create();
+        \App\Models\Dinosaurio::factory(50)->create();
+        \App\Models\Tarea::factory(30)->create();
     }
 }

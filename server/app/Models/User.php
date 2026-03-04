@@ -18,9 +18,11 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nick',
         'email',
         'password',
+        'foto',
+        'rol',
     ];
 
     /**
@@ -33,6 +35,10 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    public function tareas() {
+        return $this->belongsToMany(Tarea::class, 'tarea_usuario');
+    }
+
     /**
      * Get the attributes that should be cast.
      *
@@ -41,7 +47,6 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
     }
