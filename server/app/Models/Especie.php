@@ -9,4 +9,14 @@ class Especie extends Model
 {
     /** @use HasFactory<\Database\Factories\EspecieFactory> */
     use HasFactory;
+
+    protected $fillable = [
+        'nombre',
+        'dieta',
+        'peligrosidad',
+    ];
+
+    public function dinosaurios() {
+        return $this->hasMany(Dinosaurio::class);
+    }
 }
