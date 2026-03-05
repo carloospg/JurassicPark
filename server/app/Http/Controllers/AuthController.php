@@ -90,4 +90,63 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    public function login(Request $request) {
+        $rules = [
+            'email' => 'required|email',
+            'password' => 'required',
+        ];
+
+        $messages = [
+            'required' => 'El campo :attribute es obligatorio',
+            'email' => 'El campo :attribute debe ser un correo electronico valido',
+        ];
+
+        $attributes = [
+            'email' => 'correo electronico',
+            'password' => 'contraseña',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages, $attributes);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errores' => $validator->errors()
+            ], 422);
+        } 
+
+        try {
+            if (! $token = JWTAuth::attempt($request->only('email', 'password'))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Credenciales incorrectas',
+                ], 401);
+            }
+
+            $user = User::where('email', $request->email)->firstOrFail();
+
+            $success = [
+                'id' => $user->id,
+                'nick' => $user->nick,
+                'email' => $user->email,
+                'rol' => $user->rol,
+                'token' => $token,
+                'foto' => $user->foto ?? null,
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $success,
+                'message' => 'Login exitoso',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error en el login: '.$e->getMessage()
+            ], 500);
+        }
+
+    }
 }
