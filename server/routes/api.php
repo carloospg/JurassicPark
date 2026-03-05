@@ -5,3 +5,4 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
 Route::post('/registro', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);

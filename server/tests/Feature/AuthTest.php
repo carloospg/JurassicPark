@@ -93,4 +93,74 @@ class AuthTest extends TestCase
             ]
         ]);
     }
+
+    public function test_iniciar_sesion_correctamente()
+    {
+        User::create([
+            'nick' => 'AdminLogin',
+            'email' => 'login@test.com',
+            'password' => bcrypt('Contrasenia123?'),
+            'rol' => 'Veterinario'
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => 'login@test.com',
+            'password' => 'Contrasenia123?',
+        ]);
+
+        $response->assertStatus(200);
+
+        $response->assertJsonStructure([
+            'success',
+            'data' => [
+                'id',
+                'nick',
+                'email',
+                'rol',
+                'token',
+                'foto',
+            ],
+            'message',
+        ]);
+    }
+
+    public function test_fallo_iniciar_sesion_password_incorrecta()
+    {
+        User::create([
+            'nick' => 'FalloLogin',
+            'email' => 'fallo@test.com',
+            'password' => bcrypt('Contrasenia123?'),
+            'rol' => 'Veterinario'
+        ]);
+
+        $response = $this->postJson('/api/login', [
+            'email' => 'fallo@test.com',
+            'password' => 'ContraseniaEquivocada!',
+        ]);
+
+        $response->assertStatus(401);
+
+        $response->assertJson([
+            'success' => false,
+            'message' => 'Credenciales incorrectas',
+        ]);
+    }
+
+    public function test_fallo_iniciar_sesion_validacion_datos()
+    {
+        $response = $this->postJson('/api/login', [
+            'email' => 'no-es-un-correo',
+            'password' => '',
+        ]);
+
+        $response->assertStatus(422);
+
+        $response->assertJsonStructure([
+            'success',
+            'errores' => [
+                'email',
+                'password'
+            ]
+        ]);
+    }
 }
