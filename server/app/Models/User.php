@@ -6,8 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
@@ -35,7 +36,8 @@ class User extends Authenticatable
         'remember_token',
     ];
 
-    public function tareas() {
+    public function tareas()
+    {
         return $this->belongsToMany(Tarea::class, 'tarea_usuario');
     }
 
@@ -48,6 +50,18 @@ class User extends Authenticatable
     {
         return [
             'password' => 'hashed',
+        ];
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [
+            'rol' => $this->rol,
         ];
     }
 }
