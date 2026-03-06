@@ -53,7 +53,76 @@ if (form) {
 
         alertSuccess.classList.remove('d-none');
         alertSuccess.classList.replace('alert-success', 'alert-info');
-        alertSuccess.innerText = 'Preparando datos para enviar a Laravel... (Falta backend)';
+        alertSuccess.innerText = 'Guardando cambios...';
 
+        const formData = new FormData();
+        formData.append('nick', nuevoNick);
+        
+        if (password) {
+            formData.append('password', password);
+            formData.append('password_confirmation', passwordConfirm);
+        }
+        
+        if (fotoFile) {
+            formData.append('foto', fotoFile);
+        }
+
+        try {
+            const token = localStorage.getItem('token_jurassic');
+
+            const response = await fetch('http://127.0.0.1:8000/api/perfil/actualizar', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/json'
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                alertSuccess.classList.add('d-none');
+                alertError.classList.remove('d-none');
+
+                if (response.status === 401) {
+                    alertError.innerText = 'Tu sesión ha caducado. Por favor, vuelve a iniciar sesión.';
+                    return;
+                }
+
+                if (data.errores) {
+                    let erroresHtml = '<ul class="mb-0">';
+                    for (const key in data.errores) {
+                        erroresHtml += `<li>${data.errores[key][0]}</li>`;
+                    }
+                    erroresHtml += '</ul>';
+                    alertError.innerHTML = erroresHtml;
+                } else {
+                    alertError.innerText = data.error || 'Error al actualizar el perfil.';
+                }
+                return;
+            }
+
+            alertError.classList.add('d-none');
+            alertSuccess.classList.remove('d-none');
+            alertSuccess.classList.replace('alert-info', 'alert-success');
+            alertSuccess.innerText = '¡Tus datos han sido actualizados con éxito!';
+
+            localStorage.setItem('user_jurassic', JSON.stringify(data.data));
+
+            if (data.data.foto) {
+                imgPreview.src = data.data.foto;
+            }
+
+            (document.getElementById('password') as HTMLInputElement).value = '';
+            (document.getElementById('password_confirmation') as HTMLInputElement).value = '';
+            (document.getElementById('foto') as HTMLInputElement).value = '';
+
+        } catch (error) {
+            console.error('Error de conexion:', error);
+            alertSuccess.classList.add('d-none');
+            alertError.classList.remove('d-none');
+            alertError.innerText = 'No se ha podido conectar con el servidor central.';
+        }
     });
 }
