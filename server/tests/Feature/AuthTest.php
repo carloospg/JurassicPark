@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class AuthTest extends TestCase
 {
@@ -162,5 +163,75 @@ class AuthTest extends TestCase
                 'password'
             ]
         ]);
+    }
+
+    public function test_actualizar_perfil_correctamente()
+    {
+        $user = User::create([
+            'nick' => 'DrGrant',
+            'email' => 'grant@test.com',
+            'password' => bcrypt('Contrasenia123?'),
+            'rol' => 'Veterinario'
+        ]);
+
+        $token = JWTAuth::fromUser($user);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/perfil/actualizar', [
+            'nick' => 'AlanGrant',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonStructure([
+            'success',
+            'data' => ['id', 'nick', 'email', 'rol', 'foto'],
+            'message'
+        ]);
+
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'nick' => 'AlanGrant'
+        ]);
+    }
+
+    public function test_fallo_actualizar_perfil_nick_duplicado()
+    {
+        User::create([
+            'nick' => 'UsuarioUno',
+            'email' => 'uno@test.com',
+            'password' => bcrypt('Pass123!'),
+            'rol' => 'Veterinario'
+        ]);
+
+        $userDos = User::create([
+            'nick' => 'UsuarioDos',
+            'email' => 'dos@test.com',
+            'password' => bcrypt('Pass123!'),
+            'rol' => 'Veterinario'
+        ]);
+
+        $token = JWTAuth::fromUser($userDos);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $token,
+        ])->postJson('/api/perfil/actualizar', [
+            'nick' => 'UsuarioUno',
+        ]);
+
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'success',
+            'errores' => ['nick']
+        ]);
+    }
+
+    public function test_fallo_actualizar_perfil_sin_token()
+    {
+        $response = $this->postJson('/api/perfil/actualizar', [
+            'nick' => 'HackerNinja',
+        ]);
+
+        $response->assertStatus(401);
     }
 }
