@@ -27,8 +27,8 @@ class UserFactory extends Factory
             'nick' => fake()->userName(),
             'email' => fake()->unique()->safeEmail(),
             'password' => bcrypt('password'),
-            'foto' => null,
-            'rol' => fake()->randomElement(['Administrador', 'Veterinario', 'Mantenimiento']),
+            'foto' => 'https://res.cloudinary.com/dgznikiob/image/upload/v1772707938/fotoperfil_hmislm.png',
+            'rol' => 'Veterinario',
             'remember_token' => Str::random(10),
         ];
     }
