@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
             'email' => 'admin@jurassicpark.com',
             'password' => bcrypt('admin'),
             'rol' => 'Administrador',
+            'foto' => 'https://res.cloudinary.com/dgznikiob/image/upload/v1772707938/fotoperfil_hmislm.png',
         ]);
     }
 }

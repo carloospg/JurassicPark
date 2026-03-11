@@ -161,7 +161,6 @@ class AuthController extends Controller
         }
 
         $rules = [
-            // El nick debe ser único, excepto para el ID del usuario actual para que pueda guardar sin cambiar su nick
             'nick' => 'required|string|max:30|unique:users,nick,' . $user->id,
             'foto' => 'nullable|image|mimes:jpeg,png,gif,webp,svg|max:2048',
             'password' => 'nullable|min:6|confirmed',
@@ -205,7 +204,6 @@ class AuthController extends Controller
                 $originalName = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
                 $extension = $file->getClientOriginalExtension();
                 $filename = uniqid('img_') . '_' . Str::slug($originalName) . '.' . $extension;
-
                 $uploadedFilePath = Storage::disk('cloudinary')->putFileAs('jurassic', $file, $filename);
                 $user->foto = Storage::disk('cloudinary')->url($uploadedFilePath);
             }
