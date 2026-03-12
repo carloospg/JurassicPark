@@ -5,10 +5,11 @@ const CONSTANTS = {
         LOGIN_ENDPOINT: 'login',
         PROFILE_UPDATE: 'perfil/actualizar',
         USERS: 'usuarios',
+        CELDAS: 'celdas',
     },
     APP: {
         NAME: 'Jurassic Park',
-        USER_DEFAULT_AVATAR: 'https://via.placeholder.com/90',
+        USER_DEFAULT_AVATAR: 'https://res.cloudinary.com/dgznikiob/image/upload/v1772707938/fotoperfil_hmislm.png',
     },
     ROUTES: {
         INDEX: '/',
