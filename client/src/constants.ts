@@ -6,6 +6,8 @@ const CONSTANTS = {
         PROFILE_UPDATE: 'perfil/actualizar',
         USERS: 'usuarios',
         CELDAS: 'celdas',
+        DINOSAURIOS: 'dinosaurios',
+        ESPECIES: 'especies'
     },
     APP: {
         NAME: 'Jurassic Park',
@@ -16,6 +18,7 @@ const CONSTANTS = {
         PANEL: '/src/panel/panel.html',
         PROFILE: '/src/perfil/perfil.html',
         USERS: '/src/usuarios/usuarios.html',
+        DINOSAURIOS: '/src/dinosaurios/dinosaurios.html',
     }
 };
 
