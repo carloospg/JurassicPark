@@ -7,7 +7,8 @@ const CONSTANTS = {
         USERS: 'usuarios',
         CELDAS: 'celdas',
         DINOSAURIOS: 'dinosaurios',
-        ESPECIES: 'especies'
+        ESPECIES: 'especies',
+        TAREAS: 'tareas',
     },
     APP: {
         NAME: 'Jurassic Park',
@@ -19,6 +20,7 @@ const CONSTANTS = {
         PROFILE: '/src/perfil/perfil.html',
         USERS: '/src/usuarios/usuarios.html',
         DINOSAURIOS: '/src/dinosaurios/dinosaurios.html',
+        TAREAS: '/src/tareas/tareas.html',
     }
 };
 
