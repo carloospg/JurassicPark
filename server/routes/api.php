@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CeldaController;
 use App\Http\Controllers\DinosaurioController;
 use App\Http\Controllers\EspecieController;
+use App\Http\Controllers\TareaController;
 
 Route::post('/registro', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -37,5 +38,13 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/', [DinosaurioController::class, 'createDinosaurio']);
         Route::post('/{id}', [DinosaurioController::class, 'updateDinosaurio']);
         Route::delete('/{id}', [DinosaurioController::class, 'deleteDinosaurio']);
+    });
+
+    Route::prefix('tareas')->group(function () {
+        Route::get('/', [TareaController::class, 'getTareas']);
+        Route::get('/{id}', [TareaController::class, 'getTarea']);
+        Route::post('/', [TareaController::class, 'createTarea']);
+        Route::patch('/{id}/estado', [TareaController::class, 'updateEstado']);
+        Route::delete('/{id}', [TareaController::class, 'deleteTarea']);
     });
 });
