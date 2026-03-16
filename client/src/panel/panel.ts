@@ -1,9 +1,8 @@
 import CONSTANTS from "../constants";
-import { initNavbar } from "../navbar";
+import { initNavbar } from "../navbar/navbar";
 
 declare const bootstrap: any;
 
-// ─── GUARDIA DE RUTA Y NAVBAR ─────────────────────────────────────────────────
 const token = sessionStorage.getItem("token_jurassic");
 const userString = sessionStorage.getItem("user_jurassic");
 
@@ -12,20 +11,15 @@ if (!token || !userString) {
 }
 
 const usuarioActual = JSON.parse(userString!);
+const esAdmin = usuarioActual.rol === "Administrador";
 
-// Montamos el navbar indicando que la pagina activa es 'panel'
 initNavbar("panel");
 
-// ─── BOTON CREAR (solo admin) ─────────────────────────────────────────────────
-if (usuarioActual.rol !== "Administrador") {
+if (!esAdmin) {
   document.getElementById("btn-nueva-celda")?.remove();
 }
 
-// ─── GRID DE CELDAS ───────────────────────────────────────────────────────────
-const contenedorGrid = document.getElementById(
-  "contenedor-grid",
-) as HTMLDivElement;
-
+// ─── COLORES ──────────────────────────────────────────────────────────────────
 const coloresSeguiridad: Record<string, string> = {
   Bajo: "border-danger bg-danger bg-opacity-10",
   Medio: "border-warning bg-warning bg-opacity-10",
@@ -40,17 +34,18 @@ const badgeSeguiridad: Record<string, string> = {
   Extremo: "bg-primary",
 };
 
+// ─── GRID DE CELDAS ───────────────────────────────────────────────────────────
+const contenedorGrid = document.getElementById(
+  "contenedor-grid",
+) as HTMLDivElement;
+
 const cargarGrid = async () => {
   try {
     const res = await fetch(CONSTANTS.API.BASE_URL + CONSTANTS.API.CELDAS, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-      },
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
     });
 
     const data = await res.json();
-
     if (!res.ok) throw new Error(data.message || "Error al cargar las celdas");
 
     const celdas: any[] = data.data;
@@ -60,7 +55,7 @@ const cargarGrid = async () => {
                 <div class="text-center py-5">
                     <i class="bi bi-grid fs-1 text-muted mb-3"></i>
                     <h5 class="text-muted">No hay celdas creadas todavia</h5>
-                    ${usuarioActual.rol === "Administrador" ? '<p class="text-secondary">Pulsa "Nueva Celda" para empezar a construir el parque</p>' : ""}
+                    ${esAdmin ? '<p class="text-secondary">Pulsa "Nueva Celda" para empezar a construir el parque</p>' : ""}
                 </div>
             `;
       return;
@@ -77,7 +72,9 @@ const cargarGrid = async () => {
     let gridHtml = "";
 
     for (let f = 1; f <= maxFila; f++) {
-      gridHtml += `<div class="d-flex gap-2 mb-2">`;
+      // Cada fila usa CSS grid con tantas columnas como maxColumna
+      // para que las celdas ocupen siempre el ancho completo de la pagina
+      gridHtml += `<div class="grid-fila" style="grid-template-columns: repeat(${maxColumna}, 1fr);">`;
 
       for (let col = 1; col <= maxColumna; col++) {
         const celda = mapaCeldas[`${f}-${col}`];
@@ -87,7 +84,6 @@ const cargarGrid = async () => {
             coloresSeguiridad[celda.nivel_seguridad] || "border-secondary";
           const badgeClase =
             badgeSeguiridad[celda.nivel_seguridad] || "bg-secondary";
-
           const alimentoColor =
             celda.alimento_porcentaje > 50
               ? "bg-success"
@@ -95,52 +91,35 @@ const cargarGrid = async () => {
                 ? "bg-warning"
                 : "bg-danger";
 
-          const botonesAdmin =
-            usuarioActual.rol === "Administrador"
-              ? `
-                        <div class="d-flex gap-1 mt-2">
-                            <button class="btn btn-outline-primary btn-sm flex-fill btn-editar-celda"
-                                data-id="${celda.id}"
-                                data-fila="${celda.fila}"
-                                data-columna="${celda.columna}"
-                                data-seguridad="${celda.nivel_seguridad}"
-                                data-alimento="${celda.alimento_porcentaje}"
-                                data-averias="${celda.averias_pendientes}">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="btn btn-outline-danger btn-sm flex-fill btn-eliminar-celda" data-id="${celda.id}">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
-                    `
-              : "";
-
           gridHtml += `
-                        <div class="celda-card border rounded-3 p-2 ${clasesBorde}" style="min-width: 140px; max-width: 140px; cursor: pointer;"
-                             data-id="${celda.id}">
+                        <div class="celda-card border rounded-3 p-2 ${clasesBorde}"
+                             data-id="${celda.id}"
+                             data-fila="${celda.fila}"
+                             data-columna="${celda.columna}"
+                             data-seguridad="${celda.nivel_seguridad}"
+                             data-alimento="${celda.alimento_porcentaje}"
+                             data-averias="${celda.averias_pendientes}">
                             <div class="d-flex justify-content-between align-items-center mb-1">
                                 <small class="text-muted fw-bold">${f},${col}</small>
-                                <span class="badge ${badgeClase} rounded-pill" style="font-size: 0.65rem;">${celda.nivel_seguridad}</span>
+                                <span class="badge ${badgeClase} rounded-pill" style="font-size:0.65rem">${celda.nivel_seguridad}</span>
                             </div>
                             <div class="mb-1">
-                                <small class="text-muted">🦕 ${celda.dinosaurios_count} dinos</small>
+                                <small class="text-muted fw-bold">🦕 ${celda.dinosaurios?.length ?? 0} dinos</small>
                             </div>
                             <div class="mb-1">
                                 <small class="text-muted">Alimento</small>
-                                <div class="progress" style="height: 6px;">
-                                    <div class="progress-bar ${alimentoColor}" style="width: ${celda.alimento_porcentaje}%"></div>
+                                <div class="progress" style="height:6px">
+                                    <div class="progress-bar ${alimentoColor}" style="width:${celda.alimento_porcentaje}%"></div>
                                 </div>
                             </div>
                             <div class="mb-1">
                                 <small class="text-muted">🔧 Averias: ${celda.averias_pendientes}</small>
                             </div>
-                            ${botonesAdmin}
                         </div>
                     `;
         } else {
           gridHtml += `
-                        <div class="border border-dashed rounded-3 p-2 bg-white text-center d-flex align-items-center justify-content-center"
-                             style="min-width: 140px; max-width: 140px; min-height: 100px; opacity: 0.3;">
+                        <div class="celda-vacia border border-dashed rounded-3 p-2 bg-white text-center d-flex align-items-center justify-content-center">
                             <small class="text-muted">${f},${col}</small>
                         </div>
                     `;
@@ -152,26 +131,17 @@ const cargarGrid = async () => {
 
     contenedorGrid.innerHTML = gridHtml;
 
-    contenedorGrid.querySelectorAll(".btn-editar-celda").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const b = btn as HTMLButtonElement;
-        abrirModalEditar(
-          parseInt(b.dataset.id!),
-          parseInt(b.dataset.fila!),
-          parseInt(b.dataset.columna!),
-          b.dataset.seguridad!,
-          parseInt(b.dataset.alimento!),
-          parseInt(b.dataset.averias!),
+    contenedorGrid.querySelectorAll(".celda-card").forEach((card) => {
+      card.addEventListener("click", () => {
+        const el = card as HTMLElement;
+        abrirModalDetalle(
+          parseInt(el.dataset.id!),
+          parseInt(el.dataset.fila!),
+          parseInt(el.dataset.columna!),
+          el.dataset.seguridad!,
+          parseInt(el.dataset.alimento!),
+          parseInt(el.dataset.averias!),
         );
-      });
-    });
-
-    contenedorGrid.querySelectorAll(".btn-eliminar-celda").forEach((btn) => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const id = parseInt((btn as HTMLButtonElement).dataset.id!);
-        eliminarCelda(id);
       });
     });
   } catch (error: any) {
@@ -179,7 +149,7 @@ const cargarGrid = async () => {
   }
 };
 
-// ─── MODAL CREAR / EDITAR ─────────────────────────────────────────────────────
+// ─── MODAL DETALLE / EDITAR CELDA ─────────────────────────────────────────────
 const modalCeldaEl = document.getElementById("modalCelda")!;
 const modalCelda = new bootstrap.Modal(modalCeldaEl);
 const modalTitulo = document.getElementById("modal-celda-titulo")!;
@@ -198,20 +168,14 @@ const inputAverias = document.getElementById(
   "celda-averias",
 ) as HTMLInputElement;
 const alertModal = document.getElementById("alert-modal") as HTMLDivElement;
+const listaDinos = document.getElementById(
+  "lista-dinos-modal",
+) as HTMLDivElement;
+const botonesAdmin = document.getElementById(
+  "botones-admin-modal",
+) as HTMLDivElement;
 
-const abrirModalCrear = () => {
-  modalTitulo.innerText = "Nueva Celda";
-  inputCeldaId.value = "";
-  inputFila.value = "";
-  inputColumna.value = "";
-  selectSeguridad.value = "Medio";
-  inputAlimento.value = "100";
-  inputAverias.value = "0";
-  alertModal.classList.add("d-none");
-  modalCelda.show();
-};
-
-const abrirModalEditar = (
+const abrirModalDetalle = async (
   id: number,
   fila: number,
   columna: number,
@@ -219,7 +183,7 @@ const abrirModalEditar = (
   alimento: number,
   averias: number,
 ) => {
-  modalTitulo.innerText = "Editar Celda";
+  modalTitulo.innerText = `Celda ${fila}, ${columna}`;
   inputCeldaId.value = String(id);
   inputFila.value = String(fila);
   inputColumna.value = String(columna);
@@ -227,19 +191,56 @@ const abrirModalEditar = (
   inputAlimento.value = String(alimento);
   inputAverias.value = String(averias);
   alertModal.classList.add("d-none");
+  listaDinos.innerHTML = '<span class="text-muted small">Cargando...</span>';
+
+  const campos = [inputFila, inputColumna, inputAlimento, inputAverias];
+  campos.forEach((c) => (c.disabled = !esAdmin));
+  selectSeguridad.disabled = !esAdmin;
+
+  botonesAdmin.style.display = esAdmin ? "flex" : "none";
+
   modalCelda.show();
+
+  try {
+    const res = await fetch(
+      `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.CELDAS}/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      },
+    );
+    const data = await res.json();
+
+    if (res.ok && data.data.dinosaurios?.length > 0) {
+      listaDinos.innerHTML = data.data.dinosaurios
+        .map(
+          (d: any) => `
+                <a href="/src/dinosaurios/dinosaurios.html?id=${d.id}"
+                   class="dino-modal-item d-flex align-items-center gap-2 text-decoration-none text-dark">
+                    <span class="fw-bold">${d.nick}</span>
+                    <small class="text-muted">${d.especie?.nombre ?? ""}</small>
+                    <i class="bi bi-box-arrow-up-right ms-auto text-muted" style="font-size:11px"></i>
+                </a>
+            `,
+        )
+        .join("");
+    } else {
+      listaDinos.innerHTML =
+        '<span class="text-muted small">No hay dinosaurios en esta celda</span>';
+    }
+  } catch {
+    listaDinos.innerHTML =
+      '<span class="text-muted small">Error al cargar dinosaurios</span>';
+  }
 };
 
-document
-  .getElementById("btn-nueva-celda")
-  ?.addEventListener("click", abrirModalCrear);
-
-// ─── GUARDAR CELDA (crear o editar) ───────────────────────────────────────────
+// ─── GUARDAR CAMBIOS EN CELDA EXISTENTE ───────────────────────────────────────
 document
   .getElementById("btn-guardar-celda")
   ?.addEventListener("click", async () => {
     const id = inputCeldaId.value;
-    const esEdicion = id !== "";
 
     const body = {
       fila: parseInt(inputFila.value),
@@ -249,28 +250,25 @@ document
       averias_pendientes: parseInt(inputAverias.value),
     };
 
-    const url = esEdicion
-      ? `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.CELDAS}/${id}`
-      : `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.CELDAS}`;
-
     try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
+      const res = await fetch(
+        `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.CELDAS}/${id}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(body),
         },
-        body: JSON.stringify(body),
-      });
+      );
 
       const data = await res.json();
 
       if (!res.ok) {
         let msg = data.message || "Error al guardar";
-        if (data.errores) {
-          msg = Object.values(data.errores).flat().join("<br>");
-        }
+        if (data.errores) msg = Object.values(data.errores).flat().join("<br>");
         alertModal.className = "alert alert-danger";
         alertModal.innerHTML = msg;
         return;
@@ -278,24 +276,32 @@ document
 
       modalCelda.hide();
       cargarGrid();
-    } catch (error) {
+    } catch {
       alertModal.className = "alert alert-danger";
       alertModal.innerHTML = "Error de conexion";
     }
   });
 
-// ─── ELIMINAR CELDA ───────────────────────────────────────────────────────────
+// ─── ELIMINAR DESDE EL MODAL ──────────────────────────────────────────────────
 let celdaIdAEliminar: number | null = null;
-
 const modalConfirmarBorradoEl = document.getElementById(
   "modalConfirmarBorrado",
 )!;
 const modalConfirmarBorrado = new bootstrap.Modal(modalConfirmarBorradoEl);
 
-const eliminarCelda = (id: number) => {
-  celdaIdAEliminar = id;
-  modalConfirmarBorrado.show();
-};
+document
+  .getElementById("btn-eliminar-desde-modal")
+  ?.addEventListener("click", () => {
+    celdaIdAEliminar = parseInt(inputCeldaId.value);
+    modalCelda.hide();
+    modalCeldaEl.addEventListener(
+      "hidden.bs.modal",
+      () => {
+        modalConfirmarBorrado.show();
+      },
+      { once: true },
+    );
+  });
 
 document
   .getElementById("btn-confirmar-borrado")
@@ -323,8 +329,86 @@ document
       } else {
         alert(data.message || "Error al eliminar la celda");
       }
-    } catch (error) {
+    } catch {
       alert("Error de conexion");
+    }
+  });
+
+// ─── MODAL NUEVA CELDA ────────────────────────────────────────────────────────
+const modalNuevaCeldaEl = document.getElementById("modalNuevaCelda")!;
+const modalNuevaCelda = new bootstrap.Modal(modalNuevaCeldaEl);
+const alertModalNueva = document.getElementById(
+  "alert-modal-nueva",
+) as HTMLDivElement;
+
+document.getElementById("btn-nueva-celda")?.addEventListener("click", () => {
+  (document.getElementById("nueva-celda-fila") as HTMLInputElement).value = "";
+  (document.getElementById("nueva-celda-columna") as HTMLInputElement).value =
+    "";
+  (
+    document.getElementById("nueva-celda-seguridad") as HTMLSelectElement
+  ).value = "Medio";
+  (document.getElementById("nueva-celda-alimento") as HTMLInputElement).value =
+    "100";
+  (document.getElementById("nueva-celda-averias") as HTMLInputElement).value =
+    "0";
+  alertModalNueva.classList.add("d-none");
+  modalNuevaCelda.show();
+});
+
+document
+  .getElementById("btn-guardar-nueva-celda")
+  ?.addEventListener("click", async () => {
+    const body = {
+      fila: parseInt(
+        (document.getElementById("nueva-celda-fila") as HTMLInputElement).value,
+      ),
+      columna: parseInt(
+        (document.getElementById("nueva-celda-columna") as HTMLInputElement)
+          .value,
+      ),
+      nivel_seguridad: (
+        document.getElementById("nueva-celda-seguridad") as HTMLSelectElement
+      ).value,
+      alimento_porcentaje: parseInt(
+        (document.getElementById("nueva-celda-alimento") as HTMLInputElement)
+          .value,
+      ),
+      averias_pendientes: parseInt(
+        (document.getElementById("nueva-celda-averias") as HTMLInputElement)
+          .value,
+      ),
+    };
+
+    try {
+      const res = await fetch(
+        `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.CELDAS}`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify(body),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        let msg = data.message || "Error al crear";
+        if (data.errores) msg = Object.values(data.errores).flat().join("<br>");
+        alertModalNueva.className = "alert alert-danger";
+        alertModalNueva.innerHTML = msg;
+        return;
+      }
+
+      modalNuevaCelda.hide();
+      cargarGrid();
+    } catch {
+      alertModalNueva.className = "alert alert-danger";
+      alertModalNueva.innerHTML = "Error de conexion";
     }
   });
 

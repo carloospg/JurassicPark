@@ -1,5 +1,5 @@
 import CONSTANTS from "../constants";
-import { initNavbar } from "../navbar";
+import { initNavbar } from "../navbar/navbar";
 
 declare const bootstrap: any;
 

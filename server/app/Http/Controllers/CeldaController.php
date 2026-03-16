@@ -14,11 +14,11 @@ class CeldaController extends Controller
     }
 
     public function getCeldas() {
-        $celdas = Celda::withCount('dinosaurios')
+        $celdas = Celda::with('dinosaurios')
             ->orderBy('fila')
             ->orderBy('columna')
             ->get()
-        ; // withCount sirve para saber cuantos dinosauios hay en cada celda
+        ;
 
         return response()->json([
             'success' => true,

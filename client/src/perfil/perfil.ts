@@ -1,3 +1,6 @@
+
+import { initNavbar } from "../navbar/navbar";
+
 if (!sessionStorage.getItem("token_jurassic")) {
   window.location.href = "/";
 }
@@ -11,6 +14,8 @@ const btnLogout = document.getElementById("btn-logout") as HTMLButtonElement;
 const form = document.getElementById("form-perfil") as HTMLFormElement;
 const alertError = document.getElementById("alert-error") as HTMLDivElement;
 const alertSuccess = document.getElementById("alert-success") as HTMLDivElement;
+
+initNavbar("perfil");
 
 const userString = sessionStorage.getItem("user_jurassic");
 if (userString) {

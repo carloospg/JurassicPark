@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
@@ -12,10 +12,10 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
     />
+    <link rel="stylesheet" href="/src//navbar/navbar.css" />
     <link rel="stylesheet" href="/src/panel/panel.css" />
   </head>
   <body class="bg-light">
-    <!-- El navbar se inyecta aqui desde navbar.ts -->
     <div id="navbar-container"></div>
 
     <div class="container-fluid py-4 px-4">
@@ -27,8 +27,7 @@
             <i class="bi bi-map me-2"></i>Mapa del Parque
           </h2>
           <p class="text-secondary mb-0 small">
-            Cada celda muestra su posicion, nivel de seguridad, alimento y
-            averias
+            Pulsa una celda para ver su detalle
           </p>
         </div>
         <button class="btn btn-warning fw-bold" id="btn-nueva-celda">
@@ -53,20 +52,16 @@
       </div>
     </div>
 
-    <!-- MODAL CREAR / EDITAR CELDA -->
+    <!-- MODAL DETALLE / EDITAR CELDA -->
     <div class="modal fade" id="modalCelda" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header bg-dark text-white">
-            <h5 class="modal-title" id="modal-celda-titulo">Nueva Celda</h5>
-            <button
-              type="button"
-              class="btn-close btn-close-white"
-              data-bs-dismiss="modal"
-            ></button>
+            <h5 class="modal-title" id="modal-celda-titulo">Celda</h5>
           </div>
           <div class="modal-body">
             <input type="hidden" id="celda-id" />
+
             <div class="row mb-3">
               <div class="col-6">
                 <label class="form-label fw-bold">Fila</label>
@@ -89,9 +84,125 @@
                 />
               </div>
             </div>
+
             <div class="mb-3">
               <label class="form-label fw-bold">Nivel de Seguridad</label>
               <select class="form-select" id="celda-seguridad">
+                <option value="Bajo">Bajo</option>
+                <option value="Medio">Medio</option>
+                <option value="Alto">Alto</option>
+                <option value="Extremo">Extremo</option>
+              </select>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Alimento (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celda-alimento"
+                  min="0"
+                  max="100"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Averias pendientes</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celda-averias"
+                  min="0"
+                />
+              </div>
+            </div>
+
+            <!-- Lista de dinosaurios de la celda -->
+            <div id="seccion-dinos" class="mb-2">
+              <label class="form-label fw-bold"
+                >Dinosaurios en esta celda</label
+              >
+              <div id="lista-dinos-modal" class="d-flex flex-wrap gap-2"></div>
+            </div>
+
+            <div id="alert-modal" class="alert d-none mt-2"></div>
+          </div>
+
+          <!-- Footer con botones segun rol -->
+          <div class="modal-footer d-flex justify-content-between">
+            <!-- Boton cerrar  -->
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+            <!-- Botones solo admin -->
+            <div id="botones-admin-modal" class="d-flex gap-2 d-none">
+              <button
+                type="button"
+                class="btn btn-danger"
+                id="btn-eliminar-desde-modal"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-warning fw-bold"
+                id="btn-guardar-celda"
+              >
+                <i class="bi bi-floppy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NUEVA CELDA -->
+    <div
+      class="modal fade"
+      id="modalNuevaCelda"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">Nueva Celda</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Fila</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="nueva-celda-fila"
+                  min="1"
+                  placeholder="1"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Columna</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="nueva-celda-columna"
+                  min="1"
+                  placeholder="1"
+                />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nivel de Seguridad</label>
+              <select class="form-select" id="nueva-celda-seguridad">
                 <option value="Bajo">Bajo</option>
                 <option value="Medio" selected>Medio</option>
                 <option value="Alto">Alto</option>
@@ -104,7 +215,7 @@
                 <input
                   type="number"
                   class="form-control"
-                  id="celda-alimento"
+                  id="nueva-celda-alimento"
                   min="0"
                   max="100"
                   value="100"
@@ -115,13 +226,13 @@
                 <input
                   type="number"
                   class="form-control"
-                  id="celda-averias"
+                  id="nueva-celda-averias"
                   min="0"
                   value="0"
                 />
               </div>
             </div>
-            <div id="alert-modal" class="alert d-none"></div>
+            <div id="alert-modal-nueva" class="alert d-none"></div>
           </div>
           <div class="modal-footer">
             <button
@@ -129,14 +240,14 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Cancelar
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
             </button>
             <button
               type="button"
               class="btn btn-warning fw-bold"
-              id="btn-guardar-celda"
+              id="btn-guardar-nueva-celda"
             >
-              <i class="bi bi-floppy me-1"></i> Guardar
+              <i class="bi bi-floppy"></i>
             </button>
           </div>
         </div>
@@ -165,7 +276,7 @@
           <div class="modal-body text-center">
             <p class="mb-1">Esta accion no se puede deshacer</p>
             <p class="text-muted small">
-              Los dinosaurios de esta celda quedaran sin jaula asignada
+              Los dinosaurios quedaran sin jaula asignada
             </p>
           </div>
           <div class="modal-footer justify-content-center">
