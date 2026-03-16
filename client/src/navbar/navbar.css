@@ -1,0 +1,11 @@
+.nav-user-foto {
+    width: 40px;
+    height: 40px;
+    display: none;
+}
+
+.dropdown-item:active,
+.dropdown-item:focus {
+    background-color: transparent;
+    color: #212529;
+}

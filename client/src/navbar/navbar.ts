@@ -1,6 +1,6 @@
-import CONSTANTS from "./constants";
+import CONSTANTS from "../constants";
 
-export function initNavbar(paginaActiva: "panel" | "dinosaurios" | "personal") {
+export function initNavbar(paginaActiva: "panel" | "dinosaurios" | "personal" | "perfil") {
   const token = sessionStorage.getItem("token_jurassic");
   const userString = sessionStorage.getItem("user_jurassic");
 
