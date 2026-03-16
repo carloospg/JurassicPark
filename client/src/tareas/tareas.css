@@ -1,0 +1,22 @@
+.tarea-card {
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+}
+
+.tarea-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.tarea-pendiente {
+    border-left: 4px solid #ffc107;
+}
+
+.tarea-en-progreso {
+    border-left: 4px solid #0d6efd;
+}
+
+.tarea-finalizada {
+    border-left: 4px solid #198754;
+    opacity: 0.7;
+}

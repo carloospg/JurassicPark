@@ -1,6 +1,8 @@
 import CONSTANTS from "../constants";
 
-export function initNavbar(paginaActiva: "panel" | "dinosaurios" | "personal" | "perfil") {
+export function initNavbar(
+  paginaActiva: "panel" | "dinosaurios" | "tareas" | "personal" | "perfil",
+) {
   const token = sessionStorage.getItem("token_jurassic");
   const userString = sessionStorage.getItem("user_jurassic");
 
@@ -15,7 +17,7 @@ export function initNavbar(paginaActiva: "panel" | "dinosaurios" | "personal" | 
     usuario.rol === "Administrador"
       ? `
         <li class="nav-item">
-            <a class="nav-link ${paginaActiva === "personal" ? "active" : ""}" href="/src/usuarios/usuarios.html">
+            <a class="nav-link ${paginaActiva === "personal" ? "active" : ""}" href="${CONSTANTS.ROUTES.USERS}">
                 <i class="bi bi-people-fill me-1"></i> Personal
             </a>
         </li>
@@ -41,6 +43,11 @@ export function initNavbar(paginaActiva: "panel" | "dinosaurios" | "personal" | 
                         <li class="nav-item">
                             <a class="nav-link ${paginaActiva === "dinosaurios" ? "active" : ""}" href="${CONSTANTS.ROUTES.DINOSAURIOS}">
                                 <i class="bi bi-egg-fill me-1"></i> Dinosaurios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link ${paginaActiva === "tareas" ? "active" : ""}" href="${CONSTANTS.ROUTES.TAREAS}">
+                                <i class="bi bi-clipboard-check me-1"></i> Tareas
                             </a>
                         </li>
                         ${linkPersonal}
@@ -74,7 +81,6 @@ export function initNavbar(paginaActiva: "panel" | "dinosaurios" | "personal" | 
     navUserFoto.style.display = "block";
   }
 
-  // Evento de cerrar sesion
   document.getElementById("btn-logout-nav")?.addEventListener("click", () => {
     sessionStorage.removeItem("token_jurassic");
     sessionStorage.removeItem("user_jurassic");

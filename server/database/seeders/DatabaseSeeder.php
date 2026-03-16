@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Tarea;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -26,5 +27,12 @@ class DatabaseSeeder extends Seeder
         \App\Models\Celda::factory(20)->create();
         \App\Models\Dinosaurio::factory(50)->create();
         \App\Models\Tarea::factory(30)->create();
+
+        $empleados = User::whereIn('rol', ['Veterinario', 'Mantenimiento'])->pluck('id');
+ 
+        Tarea::all()->each(function (Tarea $tarea) use ($empleados) {
+            $asignados = $empleados->random(min(rand(1, 3), $empleados->count()));
+            $tarea->usuarios()->sync($asignados);
+        });
     }
 }

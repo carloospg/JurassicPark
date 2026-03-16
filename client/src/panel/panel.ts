@@ -412,4 +412,37 @@ document
     }
   });
 
-cargarGrid();
+const params = new URLSearchParams(window.location.search);
+const celdaParam = params.get("celda");
+
+if (celdaParam) {
+  cargarGrid().then(async () => {
+    try {
+      const res = await fetch(
+        `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.CELDAS}/${celdaParam}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        },
+      );
+      const data = await res.json();
+      if (res.ok) {
+        const c = data.data;
+        abrirModalDetalle(
+          c.id,
+          c.fila,
+          c.columna,
+          c.nivel_seguridad,
+          c.alimento_porcentaje,
+          c.averias_pendientes,
+        );
+      }
+    } catch (e) {
+      console.error("Error al abrir celda desde URL", e);
+    }
+  });
+} else {
+  cargarGrid();
+}
