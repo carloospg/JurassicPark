@@ -197,6 +197,74 @@ class TareaController extends Controller
         }
     }
 
+    public function updateTarea(Request $request, int $id)
+    {
+        if (!$this->isAdmin()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Acceso denegado',
+            ], 403);
+        }
+
+        $tarea = Tarea::find($id);
+
+        if (!$tarea) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tarea no encontrada',
+            ], 404);
+        }
+
+        $rules = [
+            'tipo'           => 'required|string|max:100',
+            'celda_id'       => 'required|exists:celdas,id',
+            'usuarios_ids'   => 'nullable|array',
+            'usuarios_ids.*' => 'exists:users,id',
+        ];
+
+        $messages = [
+            'required' => 'El campo :attribute es obligatorio',
+            'exists'   => 'El :attribute seleccionado no existe',
+            'array'    => 'El campo :attribute debe ser una lista',
+        ];
+
+        $attributes = [
+            'tipo'         => 'tipo de tarea',
+            'celda_id'     => 'celda',
+            'usuarios_ids' => 'usuarios asignados',
+        ];
+
+        $validator = Validator::make($request->all(), $rules, $messages, $attributes);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errores' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $tarea->tipo     = $request->tipo;
+            $tarea->celda_id = $request->celda_id;
+            $tarea->save();
+
+            $tarea->usuarios()->sync($request->usuarios_ids ?? []);
+            $tarea->load(['celda', 'usuarios']);
+
+            return response()->json([
+                'success' => true,
+                'data'    => $tarea,
+                'message' => 'Tarea actualizada correctamente',
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => 'Error al actualizar la tarea: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
     public function deleteTarea($id)
     {
         if (!$this->isAdmin()) {

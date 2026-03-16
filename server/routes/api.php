@@ -44,6 +44,7 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/', [TareaController::class, 'getTareas']);
         Route::get('/{id}', [TareaController::class, 'getTarea']);
         Route::post('/', [TareaController::class, 'createTarea']);
+        Route::post('/{id}', [TareaController::class, 'updateTarea']);
         Route::patch('/{id}/estado', [TareaController::class, 'updateEstado']);
         Route::delete('/{id}', [TareaController::class, 'deleteTarea']);
     });
