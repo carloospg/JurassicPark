@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\CeldaController;
 use App\Http\Controllers\DinosaurioController;
 use App\Http\Controllers\EspecieController;
+use App\Http\Controllers\SimulacionController;
 use App\Http\Controllers\TareaController;
 
 Route::post('/registro', [AuthController::class, 'register']);
@@ -47,5 +48,10 @@ Route::middleware('auth:api')->group(function () {
         Route::post('/{id}', [TareaController::class, 'updateTarea']);
         Route::patch('/{id}/estado', [TareaController::class, 'updateEstado']);
         Route::delete('/{id}', [TareaController::class, 'deleteTarea']);
+    });
+
+    Route::prefix('simulaciones')->group(function () {
+        Route::post('/normal', [SimulacionController::class, 'simularNormal']);
+        Route::get('/informes', [SimulacionController::class, 'getInformes']);
     });
 });

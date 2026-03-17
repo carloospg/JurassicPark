@@ -10,8 +10,6 @@ class InformeSimulacion extends Model
     /** @use HasFactory<\Database\Factories\InformeSimulacionFactory> */
     use HasFactory;
 
-    protected $table = "informe_simulacion";
-
     protected $fillable = [
         'fecha_simulacion',
         'tipo',
