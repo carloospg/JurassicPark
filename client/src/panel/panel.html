@@ -12,7 +12,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
     />
-    <link rel="stylesheet" href="/src//navbar/navbar.css" />
+    <link rel="stylesheet" href="/src/navbar/navbar.css" />
     <link rel="stylesheet" href="/src/panel/panel.css" />
   </head>
   <body class="bg-light">
@@ -33,6 +33,10 @@
         <div class="d-flex gap-2">
           <button class="btn btn-primary fw-bold" id="btn-simulacion-normal">
             <i class="bi bi-lightning-charge-fill me-1"></i> Simulacion Normal
+          </button>
+          <button class="btn btn-danger fw-bold" id="btn-simulacion-brecha">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> Simulacion
+            Brecha
           </button>
           <button class="btn btn-warning fw-bold" id="btn-nueva-celda">
             <i class="bi bi-plus-lg me-1"></i> Nueva Celda
@@ -327,6 +331,91 @@
             ></button>
           </div>
           <div class="modal-body" id="modal-simulacion-body"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL LANZAR SIMULACION BRECHA -->
+    <div
+      class="modal fade"
+      id="modalLanzarBrecha"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Simulacion de
+              Brecha
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted small mb-3">
+              Selecciona una celda para simular la brecha o deja el campo vacio
+              para que sea aleatoria.
+            </p>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Celda (opcional)</label>
+              <select class="form-select" id="brecha-celda-select">
+                <option value="">Aleatoria</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer d-flex justify-content-between">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold"
+              id="btn-confirmar-brecha"
+            >
+              <i class="bi bi-lightning-fill me-1"></i> Lanzar Brecha
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RESULTADO SIMULACION BRECHA -->
+    <div
+      class="modal fade"
+      id="modalResultadoBrecha"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white" id="brecha-header">
+            <h5 class="modal-title" id="brecha-titulo">
+              Resultado de la Brecha
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="modal-brecha-body"></div>
           <div class="modal-footer">
             <button
               type="button"
