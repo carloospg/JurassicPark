@@ -52,6 +52,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::prefix('simulaciones')->group(function () {
         Route::post('/normal', [SimulacionController::class, 'simularNormal']);
+        Route::post('/brecha', [SimulacionController::class, 'simularBrecha']);
         Route::get('/informes', [SimulacionController::class, 'getInformes']);
     });
 });
