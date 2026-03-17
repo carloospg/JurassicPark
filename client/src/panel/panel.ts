@@ -17,6 +17,7 @@ initNavbar("panel");
 
 if (!esAdmin) {
   document.getElementById("btn-nueva-celda")?.remove();
+  document.getElementById("btn-simulacion-normal")?.remove();
 }
 
 // ─── COLORES ──────────────────────────────────────────────────────────────────
@@ -409,6 +410,97 @@ document
     } catch {
       alertModalNueva.className = "alert alert-danger";
       alertModalNueva.innerHTML = "Error de conexion";
+    }
+  });
+
+// ─── SIMULACION NORMAL ────────────────────────────────────────────────────────
+const modalSimulacionEl = document.getElementById("modalSimulacion")!;
+const modalSimulacion = new bootstrap.Modal(modalSimulacionEl);
+const modalSimulacionBody = document.getElementById(
+  "modal-simulacion-body",
+) as HTMLDivElement;
+
+document
+  .getElementById("btn-simulacion-normal")
+  ?.addEventListener("click", async () => {
+    modalSimulacionBody.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-danger" role="status"></div>
+            <p class="text-secondary mt-2">Ejecutando simulacion...</p>
+        </div>
+    `;
+    modalSimulacion.show();
+
+    try {
+      const res = await fetch(`${CONSTANTS.API.BASE_URL}simulaciones/normal`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        modalSimulacionBody.innerHTML = `<div class="alert alert-danger">${data.message || "Error en la simulacion"}</div>`;
+        return;
+      }
+
+      const resultado = data.data;
+
+      // Construyo el resumen de resultados
+      const celdasHtml = resultado.celdas
+        .map((c: any) => {
+          const cambiosHtml =
+            c.cambios.length > 0
+              ? c.cambios
+                  .map((cambio: string) => `<li class="small">${cambio}</li>`)
+                  .join("")
+              : '<li class="small text-muted">Sin cambios</li>';
+
+          const colorAlimento =
+            c.alimento_despues > 50
+              ? "text-success"
+              : c.alimento_despues > 25
+                ? "text-warning"
+                : "text-danger";
+
+          return `
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card border shadow-sm rounded-3 h-100">
+                        <div class="card-header bg-dark text-white py-2">
+                            <small class="fw-bold">${c.posicion}</small>
+                        </div>
+                        <div class="card-body py-2">
+                            <p class="mb-1 small">
+                                Alimento: <span class="fw-bold">${c.alimento_antes}%</span>
+                                <i class="bi bi-arrow-right mx-1"></i>
+                                <span class="fw-bold ${colorAlimento}">${c.alimento_despues}%</span>
+                            </p>
+                            <p class="mb-1 small">Averias: <span class="fw-bold">${c.averias_despues}</span></p>
+                            <ul class="mb-0 ps-3">${cambiosHtml}</ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+        })
+        .join("");
+
+      modalSimulacionBody.innerHTML = `
+            <div class="alert alert-warning mb-3">
+                <i class="bi bi-lightning-charge-fill me-2"></i>
+                <strong>Simulacion completada:</strong>
+                ${resultado.total_celdas} celdas afectadas,
+                ${resultado.tareas_creadas} tareas creadas automaticamente
+            </div>
+            <div class="row g-2">
+                ${celdasHtml}
+            </div>
+        `;
+
+      cargarGrid();
+    } catch {
+      modalSimulacionBody.innerHTML = `<div class="alert alert-danger">Error de conexion</div>`;
     }
   });
 

@@ -30,9 +30,14 @@
             Pulsa una celda para ver su detalle
           </p>
         </div>
-        <button class="btn btn-warning fw-bold" id="btn-nueva-celda">
-          <i class="bi bi-plus-lg me-1"></i> Nueva Celda
-        </button>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary fw-bold" id="btn-simulacion-normal">
+            <i class="bi bi-lightning-charge-fill me-1"></i> Simulacion Normal
+          </button>
+          <button class="btn btn-warning fw-bold" id="btn-nueva-celda">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Celda
+          </button>
+        </div>
       </div>
 
       <div class="d-flex gap-3 mb-4 flex-wrap">
@@ -293,6 +298,42 @@
               id="btn-confirmar-borrado"
             >
               <i class="bi bi-trash me-1"></i> Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RESULTADO SIMULACION NORMAL -->
+    <div
+      class="modal fade"
+      id="modalSimulacion"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"
+      >
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-lightning-charge-fill me-2"></i>Resultado de la
+              Simulacion
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="modal-simulacion-body"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
             </button>
           </div>
         </div>
