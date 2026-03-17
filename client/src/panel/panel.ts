@@ -18,6 +18,7 @@ initNavbar("panel");
 if (!esAdmin) {
   document.getElementById("btn-nueva-celda")?.remove();
   document.getElementById("btn-simulacion-normal")?.remove();
+  document.getElementById("btn-simulacion-brecha")?.remove();
 }
 
 // ─── COLORES ──────────────────────────────────────────────────────────────────
@@ -501,6 +502,137 @@ document
       cargarGrid();
     } catch {
       modalSimulacionBody.innerHTML = `<div class="alert alert-danger">Error de conexion</div>`;
+    }
+  });
+
+// ─── SIMULACION BRECHA ────────────────────────────────────────────────────────
+const modalLanzarBrechaEl = document.getElementById("modalLanzarBrecha")!;
+const modalLanzarBrecha = new bootstrap.Modal(modalLanzarBrechaEl);
+const modalResultadoBrechaEl = document.getElementById("modalResultadoBrecha")!;
+const modalResultadoBrecha = new bootstrap.Modal(modalResultadoBrechaEl);
+const brechaCeldaSelect = document.getElementById(
+  "brecha-celda-select",
+) as HTMLSelectElement;
+const modalBrechaBody = document.getElementById(
+  "modal-brecha-body",
+) as HTMLDivElement;
+const brechaHeader = document.getElementById("brecha-header") as HTMLDivElement;
+const brechaTitulo = document.getElementById(
+  "brecha-titulo",
+) as HTMLHeadingElement;
+
+document
+  .getElementById("btn-simulacion-brecha")
+  ?.addEventListener("click", async () => {
+    try {
+      const res = await fetch(CONSTANTS.API.BASE_URL + CONSTANTS.API.CELDAS, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+      const data = await res.json();
+      brechaCeldaSelect.innerHTML =
+        '<option value="">Aleatoria</option>' +
+        data.data
+          .map(
+            (c: any) =>
+              `<option value="${c.id}">Celda ${c.fila},${c.columna} - ${c.nivel_seguridad}</option>`,
+          )
+          .join("");
+    } catch {
+      brechaCeldaSelect.innerHTML = '<option value="">Aleatoria</option>';
+    }
+    modalLanzarBrecha.show();
+  });
+
+document
+  .getElementById("btn-confirmar-brecha")
+  ?.addEventListener("click", async () => {
+    const celdaId = brechaCeldaSelect.value;
+    modalLanzarBrecha.hide();
+
+    modalBrechaBody.innerHTML = `
+        <div class="text-center py-4">
+            <div class="spinner-border text-danger" role="status"></div>
+            <p class="text-secondary mt-2">Ejecutando simulacion de brecha...</p>
+        </div>
+    `;
+    brechaHeader.className = "modal-header bg-danger text-white";
+    modalLanzarBrechaEl.addEventListener(
+      "hidden.bs.modal",
+      () => {
+        modalResultadoBrecha.show();
+      },
+      { once: true },
+    );
+
+    try {
+      const body: any = celdaId ? { celda_id: parseInt(celdaId) } : {};
+      const res = await fetch(`${CONSTANTS.API.BASE_URL}simulaciones/brecha`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        modalBrechaBody.innerHTML = `<div class="alert alert-danger">${data.message || "Error en la simulacion"}</div>`;
+        return;
+      }
+
+      const r = data.data;
+      const contenida = r.brecha_contenida;
+
+      // Cambio el color del header segun el resultado
+      brechaHeader.className = contenida
+        ? "modal-header bg-success text-white"
+        : "modal-header bg-danger text-white";
+      brechaTitulo.innerHTML = contenida
+        ? '<i class="bi bi-shield-check me-2"></i>Brecha Contenida'
+        : '<i class="bi bi-exclamation-triangle-fill me-2"></i>ALERTA: Brecha No Contenida';
+
+      const factoresHtml = r.factores
+        .map((f: string) => `<li class="small">${f}</li>`)
+        .join("");
+
+      const alertClass = contenida ? "alert-success" : "alert-danger";
+      const iconoRes = contenida ? "bi-shield-check" : "bi-exclamation-octagon";
+
+      modalBrechaBody.innerHTML = `
+            <div class="alert ${alertClass} mb-3">
+                <i class="bi ${iconoRes} me-2"></i>
+                <strong>${data.message}</strong>
+            </div>
+            <div class="row mb-3">
+                <div class="col-6">
+                    <div class="card border text-center p-3">
+                        <h2 class="fw-bold ${contenida ? "text-success" : "text-danger"}">${r.puntuacion}</h2>
+                        <small class="text-muted">Puntuacion de riesgo</small>
+                        <small class="text-muted d-block">(umbral de fuga: 60)</small>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="card border text-center p-3">
+                        <h5 class="fw-bold mb-1">${r.posicion}</h5>
+                        <small class="text-muted">Celda afectada</small>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-2">
+                <p class="fw-bold mb-1">Factores de riesgo:</p>
+                <ul class="mb-0">${factoresHtml || '<li class="small text-muted">Sin factores de riesgo</li>'}</ul>
+            </div>
+            ${!contenida ? `<div class="alert alert-warning mt-3 mb-0 small"><i class="bi bi-tools me-1"></i>Se ha creado una tarea de emergencia y se han generado averias adicionales en la celda.</div>` : ""}
+        `;
+
+      cargarGrid();
+    } catch {
+      modalBrechaBody.innerHTML = `<div class="alert alert-danger">Error de conexion</div>`;
     }
   });
 
