@@ -20,5 +20,13 @@ class UserSeeder extends Seeder
             'rol' => 'Administrador',
             'foto' => 'https://res.cloudinary.com/dgznikiob/image/upload/v1772707938/fotoperfil_hmislm.png',
         ]);
+
+        User::create([
+            'nick' => 'usuario1',
+            'email' => 'usuario1@jurassic.com',
+            'password' => bcrypt('usuario1'),
+            'rol' => 'Veterinario',
+            'foto' => 'https://res.cloudinary.com/dgznikiob/image/upload/v1772707938/fotoperfil_hmislm.png',
+        ]);
     }
 }
