@@ -27,6 +27,10 @@ const alertaGeneral = document.getElementById(
   "alerta-general",
 ) as HTMLDivElement;
 const modalRol = new bootstrap.Modal(document.getElementById("modalEditarRol"));
+const modalConfirmarBorrado = new bootstrap.Modal(
+  document.getElementById("modalConfirmarBorradoUsuario"),
+);
+let usuarioIdAEliminar: string | null = null;
 
 // ─── ALERTA GENERAL ───────────────────────────────────────────────────────────
 const mostrarAlerta = (mensaje: string, tipo: "success" | "danger") => {
@@ -92,34 +96,14 @@ gridUsuarios.addEventListener("click", async (e) => {
 
   const btnBorrar = target.closest(".btn-borrar") as HTMLButtonElement;
   if (btnBorrar) {
-    const id = btnBorrar.getAttribute("data-id");
-    if (
-      confirm(
-        "Peligro: estas seguro de que quieres dar de baja a este empleado? Esta accion no se puede deshacer",
-      )
-    ) {
-      try {
-        const res = await fetch(
-          `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.USERS}/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              Accept: "application/json",
-            },
-          },
-        );
-        const data = await res.json();
-        if (res.ok) {
-          mostrarAlerta(data.message, "success");
-          cargarUsuarios();
-        } else {
-          mostrarAlerta(data.message, "danger");
-        }
-      } catch (error) {
-        mostrarAlerta("Error de conexion", "danger");
-      }
-    }
+    const id = btnBorrar.getAttribute("data-id")!;
+    const nick =
+      btnBorrar.closest(".card")?.querySelector(".card-title")?.textContent ??
+      "este empleado";
+    usuarioIdAEliminar = id;
+    (document.getElementById("modal-borrar-nick") as HTMLElement).innerText =
+      nick;
+    modalConfirmarBorrado.show();
   }
 
   const btnEditar = target.closest(".btn-editar") as HTMLButtonElement;
@@ -176,6 +160,36 @@ document
       }
     } catch (error) {
       alert("Error de conexion al guardar");
+    }
+  });
+
+// ─── CONFIRMAR BORRADO USUARIO ────────────────────────────────────────────────
+document
+  .getElementById("btn-confirmar-borrado-usuario")
+  ?.addEventListener("click", async () => {
+    if (!usuarioIdAEliminar) return;
+    try {
+      const res = await fetch(
+        `${CONSTANTS.API.BASE_URL}${CONSTANTS.API.USERS}/${usuarioIdAEliminar}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        },
+      );
+      const data = await res.json();
+      modalConfirmarBorrado.hide();
+      usuarioIdAEliminar = null;
+      if (res.ok) {
+        mostrarAlerta(data.message, "success");
+        cargarUsuarios();
+      } else {
+        mostrarAlerta(data.message, "danger");
+      }
+    } catch {
+      mostrarAlerta("Error de conexion", "danger");
     }
   });
 
