@@ -1,5 +1,6 @@
 import CONSTANTS from "../constants";
 import { initNavbar } from "../navbar/navbar";
+import { desconectar, escucharSimulaciones, escucharTareas } from "../notificaciones";
 
 declare const bootstrap: any;
 
@@ -320,6 +321,7 @@ btnAvanzarEstado?.addEventListener("click", async () => {
     if (res.ok) {
       modalTarea.hide();
       cargarTareas();
+
     } else {
       alertModalTarea.className = "alert alert-danger";
       alertModalTarea.innerHTML = data.message || "Error al cambiar estado";
@@ -496,3 +498,7 @@ document
   });
 
 cargarTareas();
+
+escucharTareas(() => cargarTareas());
+escucharSimulaciones(() => cargarTareas());
+window.addEventListener("beforeunload", desconectar);

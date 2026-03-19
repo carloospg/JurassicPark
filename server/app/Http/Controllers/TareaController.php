@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Tarea;
 use Illuminate\Support\Facades\Validator;
+use App\Events\TareaActualizada;
 
 class TareaController extends Controller
 {
@@ -118,6 +119,8 @@ class TareaController extends Controller
 
             $tarea->load(['celda', 'usuarios']);
 
+            broadcast(new TareaActualizada($tarea, 'creada'));
+
             return response()->json([
                 'success' => true,
                 'data'    => $tarea,
@@ -183,6 +186,8 @@ class TareaController extends Controller
             $tarea->estado = $request->estado;
             $tarea->save();
 
+            broadcast(new TareaActualizada($tarea, 'estado'));
+
             return response()->json([
                 'success' => true,
                 'data'    => $tarea,
@@ -222,19 +227,14 @@ class TareaController extends Controller
             'usuarios_ids.*' => 'exists:users,id',
         ];
 
-        $messages = [
+        $validator = Validator::make($request->all(), $rules, [
             'required' => 'El campo :attribute es obligatorio',
             'exists'   => 'El :attribute seleccionado no existe',
-            'array'    => 'El campo :attribute debe ser una lista',
-        ];
-
-        $attributes = [
+        ], [
             'tipo'         => 'tipo de tarea',
             'celda_id'     => 'celda',
             'usuarios_ids' => 'usuarios asignados',
-        ];
-
-        $validator = Validator::make($request->all(), $rules, $messages, $attributes);
+        ]);
 
         if ($validator->fails()) {
             return response()->json([
@@ -250,6 +250,8 @@ class TareaController extends Controller
 
             $tarea->usuarios()->sync($request->usuarios_ids ?? []);
             $tarea->load(['celda', 'usuarios']);
+
+            broadcast(new TareaActualizada($tarea, 'actualizada'));
 
             return response()->json([
                 'success' => true,

@@ -1,5 +1,6 @@
 import CONSTANTS from "../constants";
 import { initNavbar } from "../navbar/navbar";
+import { desconectar, escucharSimulaciones, escucharTareas } from "../notificaciones";
 
 declare const bootstrap: any;
 
@@ -670,3 +671,7 @@ if (celdaParam) {
 } else {
   cargarGrid();
 }
+
+escucharTareas(() => {});
+escucharSimulaciones(() => cargarGrid());
+window.addEventListener("beforeunload", desconectar);

@@ -18,7 +18,6 @@ if (usuarioActual.rol !== "Administrador") {
   window.location.href = "/";
 }
 
-// Montamos el navbar indicando que la pagina activa es 'personal'
 initNavbar("personal");
 
 // ─── VARIABLES ────────────────────────────────────────────────────────────────
@@ -71,7 +70,7 @@ const cargarUsuarios = async () => {
       col.innerHTML = `
                 <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden">
                     <div class="bg-dark p-3 text-center position-relative">
-                        <img src="${u.foto || CONSTANTS.APP.USER_DEFAULT_AVATAR}" alt="${u.nick}" class="rounded-circle object-fit-cover border border-3 border-white shadow" style="width: 90px; height: 90px;">
+                        <img src="${u.foto || CONSTANTS.APP.USER_DEFAULT_AVATAR}" alt="${u.nick}" class="usuario-foto rounded-circle object-fit-cover border border-3 border-white shadow">
                     </div>
                     <div class="card-body text-center mt-2">
                         <h5 class="card-title fw-bold mb-1">${u.nick}</h5>
