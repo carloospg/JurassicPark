@@ -208,6 +208,67 @@ class TareaTest extends TestCase
         $response->assertStatus(200);
     }
 
+
+    // ─── updateTarea ──────────────────────────────────────────
+
+    public function test_admin_puede_editar_tarea()
+    {
+        $admin = $this->crearAdmin();
+        $vet   = $this->crearVeterinario();
+        $celda = $this->crearCelda();
+        $tarea = $this->crearTarea($celda->id);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->tokenDe($admin),
+        ])->postJson('/api/tareas/' . $tarea->id, [
+            'tipo'         => 'Tipo actualizado',
+            'celda_id'     => $celda->id,
+            'usuarios_ids' => [$vet->id],
+        ]);
+
+        $response->assertStatus(200);
+        $this->assertDatabaseHas('tareas', ['id' => $tarea->id, 'tipo' => 'Tipo actualizado']);
+    }
+
+    public function test_veterinario_no_puede_editar_tarea()
+    {
+        $vet   = $this->crearVeterinario();
+        $celda = $this->crearCelda();
+        $tarea = $this->crearTarea($celda->id);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->tokenDe($vet),
+        ])->postJson('/api/tareas/' . $tarea->id, [
+            'tipo'     => 'Intento edicion',
+            'celda_id' => $celda->id,
+        ]);
+
+        $response->assertStatus(403);
+    }
+
+    public function test_editar_tarea_actualiza_usuarios_asignados()
+    {
+        $admin = $this->crearAdmin();
+        $vet   = $this->crearVeterinario();
+        $mant  = $this->crearMantenimiento();
+        $celda = $this->crearCelda();
+        $tarea = $this->crearTarea($celda->id);
+        $tarea->usuarios()->attach($vet->id);
+
+        $response = $this->withHeaders([
+            'Authorization' => 'Bearer ' . $this->tokenDe($admin),
+        ])->postJson('/api/tareas/' . $tarea->id, [
+            'tipo'         => $tarea->tipo,
+            'celda_id'     => $celda->id,
+            'usuarios_ids' => [$mant->id],
+        ]);
+
+        $response->assertStatus(200);
+        // Ahora solo debe estar el de mantenimiento
+        $this->assertDatabaseHas('tarea_usuario', ['tarea_id' => $tarea->id, 'user_id' => $mant->id]);
+        $this->assertDatabaseMissing('tarea_usuario', ['tarea_id' => $tarea->id, 'user_id' => $vet->id]);
+    }
+
     // ─── deleteTarea ──────────────────────────────────────────
 
     public function test_admin_puede_eliminar_tarea()
