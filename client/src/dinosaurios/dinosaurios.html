@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dinosaurios | Jurassic Park</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="/src//navbar/navbar.css" />
+    <link rel="stylesheet" href="/src/dinosaurios/dinosaurios.css" />
+  </head>
+  <body class="bg-light">
+    <div id="navbar-container"></div>
+
+    <div class="container-fluid py-4 px-4">
+      <div
+        class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"
+      >
+        <div>
+          <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-egg-fill me-2"></i>Dinosaurios
+          </h2>
+          <p class="text-secondary mb-0 small">
+            Pulsa una tarjeta para ver su detalle
+          </p>
+        </div>
+        <button class="btn btn-warning fw-bold" id="btn-nuevo-dino">
+          <i class="bi bi-plus-lg me-1"></i> Nuevo Dinosaurio
+        </button>
+      </div>
+
+      <div class="row g-2 mb-4">
+        <div class="col-md-4">
+          <input
+            type="text"
+            class="form-control"
+            id="filtro-nombre"
+            placeholder="Buscar por nombre..."
+          />
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filtro-dieta">
+            <option value="">Todas las dietas</option>
+            <option value="Herbivoros">Herbivoros</option>
+            <option value="Omnivoros">Omnivoros</option>
+            <option value="Carnivoros">Carnivoros</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <select class="form-select" id="filtro-peligrosidad">
+            <option value="">Todas las peligrosidades</option>
+            <option value="Bajo">Bajo</option>
+            <option value="Medio">Medio</option>
+            <option value="Alto">Alto</option>
+            <option value="Muy Alto">Muy Alto</option>
+            <option value="Extremo">Extremo</option>
+            <option value="Critico">Critico</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row g-4" id="grid-dinosaurios">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="text-secondary mt-2">Cargando dinosaurios...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALLE / EDITAR DINOSAURIO -->
+    <div class="modal fade" id="modalDino" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title" id="modal-dino-titulo">Dinosaurio</h5>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="dino-id" />
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nombre (Nick)</label>
+              <input
+                type="text"
+                class="form-control"
+                id="dino-nick"
+                placeholder="Ej: Blue"
+              />
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Edad (anos)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="dino-edad"
+                  min="0"
+                  placeholder="0"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Especie</label>
+                <select class="form-select" id="dino-especie"></select>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold"
+                >Celda asignada (opcional)</label
+              >
+              <select class="form-select" id="dino-celda">
+                <option value="">Sin celda asignada</option>
+              </select>
+            </div>
+
+            <div id="alert-modal-dino" class="alert d-none"></div>
+          </div>
+
+          <div class="modal-footer d-flex justify-content-between">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+            <div id="botones-admin-dino" class="d-flex gap-2 d-none">
+              <button
+                type="button"
+                class="btn btn-danger"
+                id="btn-eliminar-dino"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-warning fw-bold"
+                id="btn-guardar-dino"
+              >
+                <i class="bi bi-floppy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR BORRADO -->
+    <div
+      class="modal fade"
+      id="modalConfirmarBorradoDino"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Eliminar
+              Dinosaurio
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-1">Esta accion no se puede deshacer</p>
+            <p class="text-muted small">
+              El dinosaurio sera eliminado permanentemente del parque
+            </p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold"
+              id="btn-confirmar-borrado-dino"
+            >
+              <i class="bi bi-trash me-1"></i> Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/src/dinosaurios/dinosaurios.ts"></script>
+  </body>
+</html>

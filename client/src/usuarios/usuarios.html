@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion de Personal | Jurassic Park</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="/src/navbar/navbar.css" />
+    <link rel="stylesheet" href="/src/usuarios/usuarios.css" />
+  </head>
+  <body class="bg-light">
+    <div id="navbar-container"></div>
+
+    <div class="container py-5">
+      <div
+        class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3"
+      >
+        <h2 class="fw-bold text-dark mb-0">
+          <i class="bi bi-card-heading me-2"></i>Directorio de Personal
+        </h2>
+      </div>
+
+      <div id="alerta-general" class="alert d-none" role="alert"></div>
+
+      <div class="row g-4" id="grid-usuarios">
+        <div class="col-12 text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+          </div>
+          <p class="text-secondary mt-2">
+            Conectando con la base de datos central...
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL EDITAR ROL -->
+    <div
+      class="modal fade"
+      id="modalEditarRol"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-shield-lock me-2"></i>Modificar Permisos
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>
+              Selecciona el nuevo rol para
+              <strong id="modal-nombre-empleado"></strong>:
+            </p>
+            <input type="hidden" id="modal-id-empleado" />
+            <select class="form-select" id="select-nuevo-rol">
+              <option value="Administrador">Administrador</option>
+              <option value="Veterinario">Veterinario</option>
+              <option value="Mantenimiento">Mantenimiento</option>
+            </select>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" id="btn-guardar-rol">
+              Guardar Cambios
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR BORRADO USUARIO -->
+    <div
+      class="modal fade"
+      id="modalConfirmarBorradoUsuario"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Dar de baja
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-1">
+              Estas seguro de que quieres dar de baja a
+              <strong id="modal-borrar-nick"></strong>?
+            </p>
+            <p class="text-muted small">Esta accion no se puede deshacer</p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold"
+              id="btn-confirmar-borrado-usuario"
+            >
+              <i class="bi bi-trash me-1"></i> Dar de baja
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/src/usuarios/usuarios.ts"></script>
+  </body>
+</html>

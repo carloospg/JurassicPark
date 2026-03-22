@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Principal | Jurassic Park</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+    />
+    <link rel="stylesheet" href="/src/navbar/navbar.css" />
+    <link rel="stylesheet" href="/src/panel/panel.css" />
+  </head>
+  <body class="bg-light">
+    <div id="navbar-container"></div>
+
+    <div class="container-fluid py-4 px-4">
+      <div
+        class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3"
+      >
+        <div>
+          <h2 class="fw-bold text-dark mb-0">
+            <i class="bi bi-map me-2"></i>Mapa del Parque
+          </h2>
+          <p class="text-secondary mb-0 small">
+            Pulsa una celda para ver su detalle
+          </p>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary fw-bold" id="btn-simulacion-normal">
+            <i class="bi bi-lightning-charge-fill me-1"></i> Simulacion Normal
+          </button>
+          <button class="btn btn-danger fw-bold" id="btn-simulacion-brecha">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> Simulacion
+            Brecha
+          </button>
+          <button class="btn btn-warning fw-bold" id="btn-nueva-celda">
+            <i class="bi bi-plus-lg me-1"></i> Nueva Celda
+          </button>
+        </div>
+      </div>
+
+      <div class="d-flex gap-3 mb-4 flex-wrap">
+        <span class="badge bg-danger px-3 py-2">Seguridad Baja</span>
+        <span class="badge bg-warning text-dark px-3 py-2"
+          >Seguridad Media</span
+        >
+        <span class="badge bg-success px-3 py-2">Seguridad Alta</span>
+        <span class="badge bg-primary px-3 py-2">Seguridad Extrema</span>
+      </div>
+
+      <div id="contenedor-grid">
+        <div class="text-center py-5">
+          <div class="spinner-border text-warning" role="status"></div>
+          <p class="text-secondary mt-2">Cargando mapa del parque...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL DETALLE / EDITAR CELDA -->
+    <div class="modal fade" id="modalCelda" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title" id="modal-celda-titulo">Celda</h5>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="celda-id" />
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Fila</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celda-fila"
+                  min="1"
+                  placeholder="1"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Columna</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celda-columna"
+                  min="1"
+                  placeholder="1"
+                />
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nivel de Seguridad</label>
+              <select class="form-select" id="celda-seguridad">
+                <option value="Bajo">Bajo</option>
+                <option value="Medio">Medio</option>
+                <option value="Alto">Alto</option>
+                <option value="Extremo">Extremo</option>
+              </select>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Alimento (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celda-alimento"
+                  min="0"
+                  max="100"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Averias pendientes</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="celda-averias"
+                  min="0"
+                />
+              </div>
+            </div>
+
+            <!-- Lista de dinosaurios de la celda -->
+            <div id="seccion-dinos" class="mb-2">
+              <label class="form-label fw-bold"
+                >Dinosaurios en esta celda</label
+              >
+              <div id="lista-dinos-modal" class="d-flex flex-wrap gap-2"></div>
+            </div>
+
+            <div id="alert-modal" class="alert d-none mt-2"></div>
+          </div>
+
+          <!-- Footer con botones segun rol -->
+          <div class="modal-footer d-flex justify-content-between">
+            <!-- Boton cerrar  -->
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+            <!-- Botones solo admin -->
+            <div id="botones-admin-modal" class="d-flex gap-2 d-none">
+              <button
+                type="button"
+                class="btn btn-danger"
+                id="btn-eliminar-desde-modal"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+              <button
+                type="button"
+                class="btn btn-warning fw-bold"
+                id="btn-guardar-celda"
+              >
+                <i class="bi bi-floppy"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL NUEVA CELDA -->
+    <div
+      class="modal fade"
+      id="modalNuevaCelda"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-dark text-white">
+            <h5 class="modal-title">Nueva Celda</h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Fila</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="nueva-celda-fila"
+                  min="1"
+                  placeholder="1"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Columna</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="nueva-celda-columna"
+                  min="1"
+                  placeholder="1"
+                />
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Nivel de Seguridad</label>
+              <select class="form-select" id="nueva-celda-seguridad">
+                <option value="Bajo">Bajo</option>
+                <option value="Medio" selected>Medio</option>
+                <option value="Alto">Alto</option>
+                <option value="Extremo">Extremo</option>
+              </select>
+            </div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label class="form-label fw-bold">Alimento (%)</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="nueva-celda-alimento"
+                  min="0"
+                  max="100"
+                  value="100"
+                />
+              </div>
+              <div class="col-6">
+                <label class="form-label fw-bold">Averias pendientes</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  id="nueva-celda-averias"
+                  min="0"
+                  value="0"
+                />
+              </div>
+            </div>
+            <div id="alert-modal-nueva" class="alert d-none"></div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+            <button
+              type="button"
+              class="btn btn-warning fw-bold"
+              id="btn-guardar-nueva-celda"
+            >
+              <i class="bi bi-floppy"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL CONFIRMAR BORRADO -->
+    <div
+      class="modal fade"
+      id="modalConfirmarBorrado"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Eliminar Celda
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body text-center">
+            <p class="mb-1">Esta accion no se puede deshacer</p>
+            <p class="text-muted small">
+              Los dinosaurios quedaran sin jaula asignada
+            </p>
+          </div>
+          <div class="modal-footer justify-content-center">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold"
+              id="btn-confirmar-borrado"
+            >
+              <i class="bi bi-trash me-1"></i> Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RESULTADO SIMULACION NORMAL -->
+    <div
+      class="modal fade"
+      id="modalSimulacion"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div
+        class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable"
+      >
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-lightning-charge-fill me-2"></i>Resultado de la
+              Simulacion
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="modal-simulacion-body"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL LANZAR SIMULACION BRECHA -->
+    <div
+      class="modal fade"
+      id="modalLanzarBrecha"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>Simulacion de
+              Brecha
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p class="text-muted small mb-3">
+              Selecciona una celda para simular la brecha o deja el campo vacio
+              para que sea aleatoria.
+            </p>
+            <div class="mb-3">
+              <label class="form-label fw-bold">Celda (opcional)</label>
+              <select class="form-select" id="brecha-celda-select">
+                <option value="">Aleatoria</option>
+              </select>
+            </div>
+          </div>
+          <div class="modal-footer d-flex justify-content-between">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cancelar
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger fw-bold"
+              id="btn-confirmar-brecha"
+            >
+              <i class="bi bi-lightning-fill me-1"></i> Lanzar Brecha
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL RESULTADO SIMULACION BRECHA -->
+    <div
+      class="modal fade"
+      id="modalResultadoBrecha"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white" id="brecha-header">
+            <h5 class="modal-title" id="brecha-titulo">
+              Resultado de la Brecha
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body" id="modal-brecha-body"></div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              <i class="bi bi-arrow-left me-1"></i> Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="/src/panel/panel.ts"></script>
+  </body>
+</html>
